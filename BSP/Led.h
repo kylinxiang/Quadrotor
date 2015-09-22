@@ -16,5 +16,6 @@ void LED2_FLASH(void);
 void LED1_ONOFF(void);
 //void LED2_ONOFF(void);
 //void LED3_ONOFF(void);
+void Delay_ms_led(u16 nms);
 
 #endif

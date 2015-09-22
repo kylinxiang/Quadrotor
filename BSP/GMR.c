@@ -97,12 +97,14 @@ void EXTI_Configuration(void)
 }
 
 
-float mx_max=0,mx_min=3.3,my_max=0,my_min=3.3,mz_max=0,mz_min=3.3;
-float mx_temp,my_temp,mz_temp,mx_mid,my_mid,mz_mid,Xsf,Ysf,Zsf;
-float mx,my,mz,norm;
+int mx_max=0,mx_min=3300,my_max=0,my_min=3300,mz_max=0,mz_min=3300;
+float Xsf=0.0,Ysf=0.0,Zsf=0.0;
+int mx_data,my_data,mz_data,mx_mid,my_mid,mz_mid;
+float mx,my,mz;
 static int cal=1;  // 防止计算偏移的循环函数重入
+T_int16_xyz	GMR_OFFSET={0,0,0};
 
-void get_GMR_data_before_calibration(void)
+void GMR_GetRaw(void)
 {
 	u8 i,j;
 	u32 sum[3];
@@ -114,63 +116,66 @@ void get_GMR_data_before_calibration(void)
 			sum[j]+=AD_Value[i][j];
 		}
 	}
-	mz_temp=(sum[0]/10)*3.3/4096;  //得到初步读取值
-	my_temp=(sum[1]/10)*3.3/4096; 
-	mx_temp=(sum[2]/10)*3.3/4096;		
+	mx_data=(int)(sum[0]/10);//*3.3/4096;  //得到初步读取值
+	my_data=(int)(sum[1]/10);//*3.3/4096; 
+	mz_data=(int)(sum[2]/10)+1500;//*3.3/4096;		
 }
 
-void calibration_GMR(void)  //校准GMR读数  //可使用中断按键来完成校准工作
-{		   
-	while(1)
+void GMR_Offset(void)  //校准GMR读数  //可使用中断按键来完成校准工作
+{	
+	if(GMR_flag==3)  //取得中值
 	{
-		get_GMR_data_before_calibration();  //均值滤波值
-		
-		if(GMR_flag==1)  //双轴GMR的最大和最小值  可以使用static的全局数  按一次时为1 按第二次为2，第三次取中值 相应灯闪三次
-		{
-			if(mx_temp>mx_max)
-				mx_max=mx_temp;
-			if(mx_temp<mx_min)
-				mx_min=mx_temp;
-			if(my_temp>my_max)
-				my_max=my_temp;
-			if(my_temp<my_min)
-				my_min=my_temp;
-		}
-		if(GMR_flag==2)  //单轴GMR的最大和最小值
-		{
-			if(mz_temp>mz_max)
-				mz_max=mz_temp;
-			if(mz_temp<mz_min)
-				mz_min=mz_temp;
-		}
-		if(GMR_flag==3)  //取得中值
-		{
-			mx_mid = (mx_max+mx_min)/2;
-			my_mid = (my_max+my_min)/2;
-			mz_mid = (mz_max+mz_min)/2;
+			mx_mid = (int)(mx_max+mx_min)/2;
+			my_mid = (int)(my_max+my_min)/2;
+			mz_mid = (int)(mz_max+mz_min)/2;
+			
+			GMR_OFFSET.X = mx_mid;
+			GMR_OFFSET.Y = my_mid;
+			GMR_OFFSET.Z = mz_mid;
 			
 			Xsf = (mz_max-mz_min)/(mx_max-mx_min);
 			Ysf = (mz_max-mz_min)/(my_max-my_min);
-			Zsf = 1;
-			
-			//添加函数将偏移数据写入EEPROM
-			break;
-		}	
-	}		
+			Zsf = 1;	
+			return;
+	}	
+	
+	for(int i=0;i<800;i++)
+	{
+		GMR_GetRaw();  //均值滤波值
+		Delay_ms_led(10);
+		if(GMR_flag==1)  //双轴GMR的最大和最小值  可以使用static的全局数  按一次时为1 按第二次为2，第三次取中值 相应灯闪三次
+		{
+			if(mx_data>mx_max)
+				mx_max=mx_data;
+			if(mx_data<mx_min)
+				mx_min=mx_data;
+			if(my_data>my_max)
+				my_max=my_data;
+			if(my_data<my_min)
+				my_min=my_data;
+		}
+		if(GMR_flag==2)  //单轴GMR的最大和最小值
+		{
+			if(mz_data>mz_max)
+				mz_max=mz_data;
+			if(mz_data<mz_min)
+				mz_min=mz_data;
+		}		
+	}	
+	LED_FLASH();	
 }
 
-void get_GMR_data_after_calibration(void)  //得到GMR校正数据后的纠正读数
+void GMR_GetData(T_int16_xyz *gmr)  //得到GMR校正数据后的纠正读数
 {
-	get_GMR_data_before_calibration();
+	GMR_GetRaw();
 	
-	mx = Xsf*(mx_temp-mx_mid);
-	my = Ysf*(my_temp-my_mid);
-	mz = Zsf*(mz_temp-mz_mid);
-
-	norm = sqrt(mx * mx + my * my + mz * mz);   //磁力计数据归一化
-	mx /= norm;
-	my /= norm;
-	mz /= norm;
+	mx = Xsf*(mx_data-mx_mid);
+	my = Ysf*(my_data-my_mid);
+	mz = Zsf*(mz_data-mz_mid);
+	gmr->X = mx;
+	gmr->Y = my;
+	gmr->Z = mz;
+		
 }	
 
 
@@ -185,20 +190,23 @@ void EXTI15_10_IRQHandler(void)
 		{ 
 			cal=0;
 			LED_FLASH(); 
-		  //calibration_GMR(); //进行平面校准
+		  GMR_Offset(); //进行平面校准
 		}
 		if(GMR_flag==2)
 		{
 			LED_FLASH();
 			LED_FLASH();
+			GMR_Offset();
 			//进行垂直校准
 		}
 		if(GMR_flag==3)
 		{
 			LED_FLASH();
 			LED_FLASH();	
-			LED_FLASH();	 
-			//将偏移值写入EEPROOM	
+			LED_FLASH();	
+			GMR_Offset();
+			
+			EE_SAVE_COMPASS_OFFSET();  	//将偏移值写入EEPROOM	
 			GMR_flag=0;	
 			cal=1;  //使计算偏移的函数能够再次进入	
 	
@@ -212,7 +220,12 @@ void EXTI15_10_IRQHandler(void)
 	{
 		//可以进行MPU6050校准
 		EXTI_ClearITPendingBit(EXTI_Line15); 
-	}
- 
+	} 
+}
+
+void GMR_Init(void)
+{
+	ADC_Configuration();
+	EXTI_Configuration();
 }
 

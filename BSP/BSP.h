@@ -15,8 +15,8 @@ void EE_READ_ACC_OFFSET(void);
 void EE_SAVE_GYRO_OFFSET(void);
 void EE_READ_GYRO_OFFSET(void);
 
-//void EE_SAVE_COMPASS_OFFSET(void);
-//void EE_READ_COMPASS_OFFSET(void);
+void EE_SAVE_COMPASS_OFFSET(void);
+void EE_READ_COMPASS_OFFSET(void);
 
 void EE_SAVE_PID(void);
 void EE_READ_PID(void);

@@ -44,17 +44,17 @@ void IMUupdate(T_int16_xyz *gyr, T_int16_xyz *acc, T_float_angle *angle)
 {
 	float ax = acc->X,ay = acc->Y,az = acc->Z;
 	float gx = gyr->X,gy = gyr->Y,gz = gyr->Z;
-  float norm;
-//  float hx, hy, hz, bx, bz;
-  float vx, vy, vz;// wx, wy, wz;
-  float ex, ey, ez;
+  extern float mx,my,mz;
+  float hx, hy, hz, bx, bz;
+  float vx, vy, vz, wx, wy, wz;
+  float ex, ey, ez,norm;
 
   float q0q0 = q0*q0;
   float q0q1 = q0*q1;
   float q0q2 = q0*q2;
-//  float q0q3 = q0*q3;
+  float q0q3 = q0*q3;
   float q1q1 = q1*q1;
-//  float q1q2 = q1*q2;
+  float q1q2 = q1*q2;
   float q1q3 = q1*q3;
   float q2q2 = q2*q2;
   float q2q3 = q2*q3;
@@ -71,17 +71,33 @@ void IMUupdate(T_int16_xyz *gyr, T_int16_xyz *acc, T_float_angle *angle)
   ax = ax /norm;
   ay = ay / norm;
   az = az / norm;
-if(norm>16500)
-{Rc_C.ARMED=0;}
-  // estimated direction of gravity and flux (v and w)
+	if(norm>16500)
+	{ Rc_C.ARMED=0; }
+
+	norm = sqrt(mx * mx + my * my + mz * mz);   //磁力计数据归一化
+	mx /= norm;
+	my /= norm;
+	mz /= norm;
+	
+	//将从机体坐标系的电子罗盘的矢量转换成地里坐标系下的磁场矢量
+	hx = 2*mx*(0.5 - q2q2 - q3q3) + 2*my*(q1q2 - q0q3) + 2*mz*(q1q3 + q0q2);
+	hy = 2*mx*(q1q2 + q0q3) + 2*my*(0.5 - q1q1 - q3q3) + 2*mz*(q2q3 - q0q1);
+	hz = 2*mx*(q1q3 - q0q2) + 2*my*(q2q3 + q0q1) + 2*mz*(0.5 - q1q1 - q2q2);
+  //计算地里坐标系下的磁场矢量(假定bx指向正北，所以by=0)
+	bx = sqrt((hx*hx) + (hy*hy));
+	bz = hz;
+	
   vx = 2*(q1q3 - q0q2);											
   vy = 2*(q0q1 + q2q3);
   vz = q0q0 - q1q1 - q2q2 + q3q3 ;
+	
+	wx = 2*bx*(0.5 - q2q2 - q3q3) + 2*bz*(q1q3 - q0q2);
+	wy = 2*bx*(q1q2 - q0q3) + 2*bz*(q0q1 + q2q3);
+	wz = 2*bx*(q0q2 + q1q3) + 2*bz*(0.5 - q1q1 - q2q2);
 
-  // error is sum of cross product between reference direction of fields and direction measured by sensors
-  ex = (ay*vz - az*vy) ;                           				
-  ey = (az*vx - ax*vz) ;
-  ez = (ax*vy - ay*vx) ;
+  ex = (ay*vz - az*vy) + (my*wz - mz*wy);                           				
+  ey = (az*vx - ax*vz) + (mz*wx - mx*wz);
+  ez = (ax*vy - ay*vx) + (mx*wy - my*wx);
 
   exInt = exInt + ex * Ki;								 
   eyInt = eyInt + ey * Ki;

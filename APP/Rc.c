@@ -33,7 +33,7 @@ void Rc_Fun(T_RC_Data *rc_in,T_RC_Control *rc_ct)
 		if(cnt_fun==75)
 		{
 			cnt_fun = 0;
-			LED2_FLASH();
+			//LED2_FLASH();
 			MPU6050_CalOff_Acc();
 		}
 	}
@@ -43,7 +43,7 @@ void Rc_Fun(T_RC_Data *rc_in,T_RC_Control *rc_ct)
 		if(cnt_fun==75)
 		{
 			cnt_fun = 0;
-			LED2_FLASH();
+			//LED2_FLASH();
 			MPU6050_CalOff_Gyr();
 		}
 	}

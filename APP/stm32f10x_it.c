@@ -66,7 +66,7 @@ void TIM3_IRQHandler(void)		//0.5ms中断一次
 		{
 			ms1_cnt = 0;
 			MPU6050_Read();
-			FLAG_ATT = 1;
+			FLAG_ATT = 1;   //表示数据读取完成
 		}
 		else
 		{

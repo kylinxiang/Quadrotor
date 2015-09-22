@@ -51,9 +51,9 @@ void Nvic_Init(void)
 #define EE_PID_POS_I	19
 #define EE_PID_POS_D	20
 
-#define EE_PID_PID1_P	21
-#define EE_PID_PID1_I	22
-#define EE_PID_PID1_D	23
+#define EE_GMR_X_OFFSET_ADDR	21
+#define EE_GMR_Y_OFFSET_ADDR	22
+#define EE_GMR_Z_OFFSET_ADDR	23
 #define EE_PID_PID2_P	24
 #define EE_PID_PID2_I	25
 #define EE_PID_PID2_D	26
@@ -93,7 +93,10 @@ uint16_t VirtAddVarTab[NumbOfVar] = {0xAA00, 0xAA01, 0xAA02, 0xAA03, 0xAA04, 0xA
 																		 0xAA10, 0xAA11, 0xAA12, 0xAA13, 0xAA14, 0xAA15, 0xAA16, 0xAA17, 0xAA18, 0xAA19, 0xAA1A, 0xAA1B, 0xAA1C, 0xAA1D, 0xAA1E, 0xAA1F,
 																		 0xAA20, 0xAA21, 0xAA22, 0xAA23, 0xAA24, 0xAA25, 0xAA26, 0xAA27, 0xAA28, 0xAA29, 0xAA2A, 0xAA2B, 0xAA2C, 0xAA2D, 0xAA2E, 0xAA2F,
 																		 0xAA30, 0xAA31, 0xAA32, 0xAA33, 0xAA34, 0xAA35, 0xAA36, 0xAA37, 0xAA38,};
+
 uint16_t temp;
+
+																		 
 void EE_INIT(void)
 {
 	EE_Init();
@@ -124,19 +127,19 @@ void EE_READ_GYRO_OFFSET(void)
 	EE_ReadVariable(VirtAddVarTab[EE_6050_GYRO_Z_OFFSET_ADDR], &GYRO_OFFSET.Z);
 }
 
-//void EE_SAVE_COMPASS_OFFSET(void)
-//{
-//	EE_WriteVariable(VirtAddVarTab[6], COMPASS_OFFSET.X);
-//	EE_WriteVariable(VirtAddVarTab[7], COMPASS_OFFSET.Y);
-//	EE_WriteVariable(VirtAddVarTab[8], COMPASS_OFFSET.Z);
-//}
+void EE_SAVE_COMPASS_OFFSET(void)
+{
+	EE_WriteVariable(VirtAddVarTab[EE_GMR_X_OFFSET_ADDR], GMR_OFFSET.X);
+	EE_WriteVariable(VirtAddVarTab[EE_GMR_Y_OFFSET_ADDR], GMR_OFFSET.Y);
+	EE_WriteVariable(VirtAddVarTab[EE_GMR_Z_OFFSET_ADDR], GMR_OFFSET.Z);
+}
 
-//void EE_READ_COMPASS_OFFSET(void)
-//{
-//	EE_ReadVariable(VirtAddVarTab[6], &COMPASS_OFFSET.X);
-//	EE_ReadVariable(VirtAddVarTab[7], &COMPASS_OFFSET.Y);
-//	EE_ReadVariable(VirtAddVarTab[8], &COMPASS_OFFSET.Z);
-//}
+void EE_READ_COMPASS_OFFSET(void)
+{
+	EE_ReadVariable(VirtAddVarTab[EE_GMR_X_OFFSET_ADDR], &GMR_OFFSET.X);
+	EE_ReadVariable(VirtAddVarTab[EE_GMR_Y_OFFSET_ADDR], &GMR_OFFSET.Y);
+	EE_ReadVariable(VirtAddVarTab[EE_GMR_Z_OFFSET_ADDR], &GMR_OFFSET.Z);
+}
 
 void EE_SAVE_PID(void)
 {
@@ -171,12 +174,6 @@ void EE_SAVE_PID(void)
 	EE_WriteVariable(VirtAddVarTab[EE_PID_POS_I],_temp);
 	_temp = PID_POS.D * 100;
 	EE_WriteVariable(VirtAddVarTab[EE_PID_POS_D],_temp);
-	_temp = PID_PID_1.P * 100;
-	EE_WriteVariable(VirtAddVarTab[EE_PID_PID1_P],_temp);
-	_temp = PID_PID_1.I * 1000;
-	EE_WriteVariable(VirtAddVarTab[EE_PID_PID1_I],_temp);
-	_temp = PID_PID_1.D * 100;
-	EE_WriteVariable(VirtAddVarTab[EE_PID_PID1_D],_temp);
 	_temp = PID_PID_2.P * 100;
 	EE_WriteVariable(VirtAddVarTab[EE_PID_PID2_P],_temp);
 	_temp = PID_PID_2.I * 1000;
@@ -276,12 +273,6 @@ void EE_READ_PID(void)
 	EE_ReadVariable(VirtAddVarTab[EE_PID_POS_I],&_temp);
 	PID_POS.I = (float)_temp / 1000;
 	EE_ReadVariable(VirtAddVarTab[EE_PID_POS_D],&_temp);
-	PID_POS.D = (float)_temp / 100;
-	EE_ReadVariable(VirtAddVarTab[EE_PID_PID1_P],&_temp);
-	PID_PID_1.P = (float)_temp / 100;
-	EE_ReadVariable(VirtAddVarTab[EE_PID_PID1_I],&_temp);
-	PID_PID_1.I = (float)_temp / 1000;
-	EE_ReadVariable(VirtAddVarTab[EE_PID_PID1_D],&_temp);
 	PID_PID_1.D = (float)_temp / 100;
 	EE_ReadVariable(VirtAddVarTab[EE_PID_PID2_P],&_temp);
 	PID_PID_2.P = (float)_temp / 100;

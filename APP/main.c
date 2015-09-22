@@ -33,6 +33,7 @@ void SYS_INIT(void)
 	
 	ANO_TC_I2C2_INIT(0xA6,400000,1,1,3,3);
 	MPU6050_Init();
+	GMR_Init();
 	
 	Spi1_Init();
 	Nrf24l01_Init(MODEL_TX2,40);
@@ -44,6 +45,7 @@ void SYS_INIT(void)
 	EE_READ_ACC_OFFSET();
 	EE_READ_GYRO_OFFSET();
 	EE_READ_PID();
+	
 	
 	Tim3_Control(1);
 }
@@ -81,7 +83,10 @@ int main(void)
 				Rc_Fun(&Rc_D,&Rc_C);
 			}
 			if(att_cnt==1)
+			{
+				GMR_GetRaw();
 				MPU6050_Dataanl(&mpu6050_dataacc1,&mpu6050_datagyr1);
+			}
 			else
 			{
 				att_cnt = 0;

@@ -12,6 +12,7 @@
 #include "GMR.h"   //发送数据到上位机时可以直接使用数据
 
 extern u8 Data_Check,Send_Status,Send_Senser,Send_RCData,Send_GpsData,Send_Offset,Send_PID1,Send_PID2,Send_PID3,Send_MotoPwm;
+extern int mx_data,my_data,mz_data;
 
 void Data_Receive_Anl(u8 *data_buf,u8 num);
 void Data_Exchange(void);

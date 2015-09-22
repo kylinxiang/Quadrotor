@@ -284,12 +284,12 @@ void Data_Send_Senser(void)
 	data_to_send[_cnt++]=BYTE0(Gyr.Y);
 	data_to_send[_cnt++]=BYTE1(Gyr.Z);
 	data_to_send[_cnt++]=BYTE0(Gyr.Z);
-	data_to_send[_cnt++]=0;  //电子罗盘预留数据
-	data_to_send[_cnt++]=0;
-	data_to_send[_cnt++]=0;
-	data_to_send[_cnt++]=0;
-	data_to_send[_cnt++]=0;
-	data_to_send[_cnt++]=0;
+	data_to_send[_cnt++]=BYTE1(mx_data);  //电子罗盘预留数据
+	data_to_send[_cnt++]=BYTE0(mx_data);
+	data_to_send[_cnt++]=BYTE1(my_data);
+	data_to_send[_cnt++]=BYTE0(my_data);
+	data_to_send[_cnt++]=BYTE1(mz_data);
+	data_to_send[_cnt++]=BYTE0(mz_data);
 	
 	data_to_send[3] = _cnt-4;
 	
@@ -374,12 +374,12 @@ void Data_Send_MotoPWM(void)
 	data_to_send[_cnt++]=BYTE0(Moto_PWM_3-1000);
 	data_to_send[_cnt++]=BYTE1(Moto_PWM_4-1000);
 	data_to_send[_cnt++]=BYTE0(Moto_PWM_4-1000);
-	data_to_send[_cnt++]=BYTE1(Moto_PWM_5);
-	data_to_send[_cnt++]=BYTE0(Moto_PWM_5);
-	data_to_send[_cnt++]=BYTE1(Moto_PWM_6);
-	data_to_send[_cnt++]=BYTE0(Moto_PWM_6);
-	data_to_send[_cnt++]=BYTE1(Moto_PWM_7);
-	data_to_send[_cnt++]=BYTE0(Moto_PWM_7);
+	data_to_send[_cnt++]=BYTE1(GMR_OFFSET.X);
+	data_to_send[_cnt++]=BYTE0(GMR_OFFSET.X);
+	data_to_send[_cnt++]=BYTE1(GMR_OFFSET.Y);
+	data_to_send[_cnt++]=BYTE0(GMR_OFFSET.Y);
+	data_to_send[_cnt++]=BYTE1(GMR_OFFSET.Z);
+	data_to_send[_cnt++]=BYTE0(GMR_OFFSET.Z);
 	data_to_send[_cnt++]=BYTE1(Moto_PWM_8);
 	data_to_send[_cnt++]=BYTE0(Moto_PWM_8);
 	
@@ -505,13 +505,13 @@ void Data_Send_PID2(void)
 	_temp = PID_POS.D * 100;
 	data_to_send[_cnt++]=BYTE1(_temp);
 	data_to_send[_cnt++]=BYTE0(_temp);
-	_temp = PID_PID_1.P * 100;
+	_temp = 0;//PID_PID_1.P * 100;
 	data_to_send[_cnt++]=BYTE1(_temp);
 	data_to_send[_cnt++]=BYTE0(_temp);
-	_temp = PID_PID_1.I * 100;
+	_temp = 0;//PID_PID_1.I * 100;
 	data_to_send[_cnt++]=BYTE1(_temp);
 	data_to_send[_cnt++]=BYTE0(_temp);
-	_temp = PID_PID_1.D * 100;
+	_temp = 0;//PID_PID_1.D * 100;
 	data_to_send[_cnt++]=BYTE1(_temp);
 	data_to_send[_cnt++]=BYTE0(_temp);
 	

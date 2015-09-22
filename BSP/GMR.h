@@ -4,16 +4,17 @@
 #include "stm32f10x.h"
 #include "math.h"
 #include "led.h"
+#include "sysconfig.h"
+#include "BSP.h"
 
-void ADC_Configuration(void);
-void EXTI_Configuration(void);
-void get_GMR_data_before_calibration(void);
-void calibration_GMR(void);
-void get_GMR_data_after_calibration(void);
+void GMR_Init(void);
+void GMR_GetRaw(void);
+void GMR_Offset(void);
+void GMR_GetData(T_int16_xyz *gmr);
 
-   
+extern T_int16_xyz	GMR_OFFSET;  
 extern u8 GMR_flag;  //根据中断按键次数计数
-extern float mx_temp,my_temp,mz_temp,mx_mid,my_mid,mz_mid,Xsf,Ysf,Zsf;
-extern float mx,my,mz,norm;
+extern float mx,my,mz,Xsf,Ysf,Zsf;
+extern int mx_mid,my_mid,mz_mid;
 
 #endif
